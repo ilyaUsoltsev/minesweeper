@@ -15,6 +15,7 @@ function App() {
   const [opened, setOpened] = useState<Record<string, boolean>>({});
   const [bombPositions, setBombPositions] = useState<string[]>([]);
   const [explodedBomb, setExplodedBomb] = useState<string>();
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const isGameStarted = useRef(false);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ function App() {
   }, [opened]);
 
   const onClickCell = (cell: string) => {
+    if (isGameOver) return;
     let cellValue: number | "BOMB";
     let bombs: string[] = [];
     if (!isGameStarted.current) {
@@ -36,9 +38,9 @@ function App() {
     }
 
     if (cellValue === "BOMB") {
-      console.log("bomb");
       setOpened({ ...opened, ...showBombs(bombPositions) });
       setExplodedBomb(cell);
+      setIsGameOver(true);
       return;
     }
 
@@ -58,6 +60,7 @@ function App() {
         {matrix.map((row, rowNumber) => {
           return row.map((col: any, colNumber: any) => (
             <Cell
+              isGameOver={isGameOver}
               onClick={() => onClickCell(`${rowNumber}${colNumber}`)}
               isExploded={explodedBomb === `${rowNumber}${colNumber}`}
               isOpen={Boolean(opened[`${rowNumber}${colNumber}`])}
