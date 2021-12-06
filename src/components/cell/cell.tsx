@@ -9,6 +9,7 @@ interface IProps {
   isMarked: boolean;
   isExploded: boolean;
   onClick: (e: any) => void;
+  doubleClick: () => void;
 }
 
 const Cell: FC<IProps> = ({
@@ -17,6 +18,7 @@ const Cell: FC<IProps> = ({
   onClick,
   isExploded,
   isGameOver,
+  doubleClick,
   isMarked,
 }) => {
   const getGameOverValue = (value: string | number) => {
@@ -30,6 +32,7 @@ const Cell: FC<IProps> = ({
     <Styled.Container
       isOpen={isOpen || (isGameOver && isMarked)}
       onClick={onClick}
+      onDoubleClick={doubleClick}
       isExploded={isExploded}
       value={value as number}
     >

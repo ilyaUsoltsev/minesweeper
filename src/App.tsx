@@ -6,6 +6,7 @@ import { getBombPositions } from "./utils/getBombPositions";
 import { getCellValue } from "./utils/getCellValue";
 import { showBombs } from "./utils/showBombs";
 import { openZeroCells } from "./utils/openEmptyCells";
+import { getAdjacentCells } from "./utils/getAdjacentCells";
 
 const getMatrix = () =>
   new Array(SIZE).fill(
@@ -27,7 +28,7 @@ function App() {
       SIZE * SIZE - Object.keys(opened).length === BOMBS_TOTAL &&
       !isGameOver
     ) {
-      setIsGameOver(true);
+      setIsGameWon(true);
     }
   }, [opened, isGameOver]);
 
@@ -42,10 +43,43 @@ function App() {
     setIsGameWon(false);
   };
 
-  const onDoubleClickCell = (cell: string) => {};
+  const onDoubleClickCell = (cell: string) => {
+    if (isGameOver || isGameWon) return;
+    const cellValue = getCellValue(cell, bombPositions);
+    const adjacentClosedCells = getAdjacentCells(cell).filter(
+      (cell) => !opened[cell]
+    );
+    const adjacentMarkedCount = adjacentClosedCells.filter(
+      (cell) => marked[cell]
+    ).length;
+    if (adjacentMarkedCount < cellValue) return;
+    const adjacentNotMarkedCells = adjacentClosedCells.filter(
+      (cell) => !marked[cell]
+    );
+    console.log(adjacentNotMarkedCells, "adjacentNotMarkedCells");
+    for (const notMarkedCell of adjacentNotMarkedCells) {
+      console.log(notMarkedCell, "notMarkedCell");
+      const notMarkedCellValue = getCellValue(notMarkedCell, bombPositions);
+      if (notMarkedCellValue === "BOMB") {
+        setOpened((prev) => ({ ...prev, ...showBombs(bombPositions) }));
+        setExplodedBomb(notMarkedCell);
+        setIsGameOver(true);
+        return;
+      }
+
+      if (notMarkedCellValue === 0) {
+        setOpened((prev) => ({
+          ...prev,
+          ...openZeroCells(notMarkedCell, bombPositions),
+        }));
+      } else {
+        setOpened((prev) => ({ ...prev, [notMarkedCell]: true }));
+      }
+    }
+  };
 
   const onClickCell = (e: any, cell: string) => {
-    if (isGameOver) return;
+    if (isGameOver || isGameWon) return;
     if (!Boolean(opened[cell]) && e.shiftKey) {
       setMarked({ ...marked, [cell]: !marked[cell] });
     } else if (!Boolean(opened[cell]) && !marked[cell]) {
@@ -86,6 +120,9 @@ function App() {
 
   return (
     <Styled.Container>
+      {!isGameOver && !isGameWon && <h1>{BOMBS_TOTAL} bombs are hidden</h1>}
+      {isGameWon && <h1>Well done!</h1>}
+      {isGameOver && <h1>GAME OVER</h1>}
       <Styled.Controls>
         <Styled.GameButton onClick={startNewGame}>
           {getButtonEmoji()}
@@ -95,13 +132,14 @@ function App() {
         {matrix.map((row, rowNumber) => {
           return row.map((col: any, colNumber: any) => (
             <Cell
-              isMarked={marked[`${rowNumber}${colNumber}`]}
+              doubleClick={() => onDoubleClickCell(`${rowNumber}-${colNumber}`)}
+              isMarked={marked[`${rowNumber}-${colNumber}`]}
               isGameOver={isGameOver}
-              onClick={(e: any) => onClickCell(e, `${rowNumber}${colNumber}`)}
-              isExploded={explodedBomb === `${rowNumber}${colNumber}`}
-              isOpen={Boolean(opened[`${rowNumber}${colNumber}`])}
+              onClick={(e: any) => onClickCell(e, `${rowNumber}-${colNumber}`)}
+              isExploded={explodedBomb === `${rowNumber}-${colNumber}`}
+              isOpen={Boolean(opened[`${rowNumber}-${colNumber}`])}
               key={col.id}
-              value={getCellValue(`${rowNumber}${colNumber}`, bombPositions)}
+              value={getCellValue(`${rowNumber}-${colNumber}`, bombPositions)}
             />
           ));
         })}

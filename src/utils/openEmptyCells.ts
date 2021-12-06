@@ -1,5 +1,6 @@
 import { SIZE } from "../constants";
 import { getCellValue } from "./getCellValue";
+import { getRowAndCol } from "./getRowAndCol";
 import { isValidZero } from "./isValidZero";
 
 export const openZeroCells = (
@@ -14,9 +15,7 @@ export const openZeroCells = (
     bombPositions: string[],
     config?: Record<string, boolean>
   ) {
-    const [row, col] = cell.split("");
-    const rowNumber = Number(row);
-    const colNumber = Number(col);
+    const { rowNumber, colNumber } = getRowAndCol(cell);
     let result: Record<string, boolean> = {};
     checkedZeros[cell] = true;
     for (
@@ -29,7 +28,7 @@ export const openZeroCells = (
         j <= Math.min(SIZE - 1, colNumber + 1);
         j++
       ) {
-        const valueToCheck = i.toString() + j.toString();
+        const valueToCheck = i.toString() + "-" + j.toString();
         result[valueToCheck] = true;
 
         if (

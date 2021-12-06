@@ -1,12 +1,11 @@
+import { getRowAndCol } from "./getRowAndCol";
 import { SIZE } from "../constants";
 
 export const getCellValue = (
   cell: string,
   bombPositions: string[]
 ): number | "BOMB" => {
-  const [row, col] = cell.split("");
-  const rowNumber = Number(row);
-  const colNumber = Number(col);
+  const { rowNumber, colNumber } = getRowAndCol(cell);
   let result = 0;
   if (bombPositions.includes(cell)) return "BOMB";
   for (
@@ -19,7 +18,7 @@ export const getCellValue = (
       j <= Math.min(SIZE - 1, colNumber + 1);
       j++
     ) {
-      const valueToCheck = i.toString() + j.toString();
+      const valueToCheck = i.toString() + "-" + j.toString();
       if (bombPositions.includes(valueToCheck)) {
         result++;
       }
