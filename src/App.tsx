@@ -7,11 +7,13 @@ import { getCellValue } from "./utils/getCellValue";
 import { showBombs } from "./utils/showBombs";
 import { openZeroCells } from "./utils/openEmptyCells";
 
-const matrix = new Array(SIZE).fill(
-  new Array(SIZE).fill(undefined).map((el) => ({ id: Math.random() }))
-);
+const getMatrix = () =>
+  new Array(SIZE).fill(
+    new Array(SIZE).fill(undefined).map((el) => ({ id: Math.random() }))
+  );
 
 function App() {
+  const [matrix, setMatrix] = useState(getMatrix);
   const [opened, setOpened] = useState<Record<string, boolean>>({});
   const [bombPositions, setBombPositions] = useState<string[]>([]);
   const [explodedBomb, setExplodedBomb] = useState<string>();
@@ -23,6 +25,15 @@ function App() {
       alert("SUCCESS!!!");
     }
   }, [opened]);
+
+  const startNewGame = () => {
+    isGameStarted.current = false;
+    setOpened({});
+    setBombPositions([]);
+    setIsGameOver(false);
+    setExplodedBomb(undefined);
+    setMatrix(getMatrix);
+  };
 
   const onClickCell = (cell: string) => {
     if (isGameOver) return;
@@ -56,6 +67,9 @@ function App() {
 
   return (
     <Styled.Container>
+      <div>
+        <button onClick={startNewGame}>NEW GAME</button>
+      </div>
       <Styled.Layout>
         {matrix.map((row, rowNumber) => {
           return row.map((col: any, colNumber: any) => (
