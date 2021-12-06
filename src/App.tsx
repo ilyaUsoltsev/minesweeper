@@ -52,13 +52,11 @@ function App() {
     const adjacentMarkedCount = adjacentClosedCells.filter(
       (cell) => marked[cell]
     ).length;
-    if (adjacentMarkedCount < cellValue) return;
+    if (adjacentMarkedCount !== cellValue) return;
     const adjacentNotMarkedCells = adjacentClosedCells.filter(
       (cell) => !marked[cell]
     );
-    console.log(adjacentNotMarkedCells, "adjacentNotMarkedCells");
     for (const notMarkedCell of adjacentNotMarkedCells) {
-      console.log(notMarkedCell, "notMarkedCell");
       const notMarkedCellValue = getCellValue(notMarkedCell, bombPositions);
       if (notMarkedCellValue === "BOMB") {
         setOpened((prev) => ({ ...prev, ...showBombs(bombPositions) }));
@@ -144,6 +142,13 @@ function App() {
           ));
         })}
       </Styled.Layout>
+      <p>
+        <strong>click</strong> - open a square
+        <br />
+        <strong>shift + click</strong> - flag a square
+        <br />
+        <strong>double click</strong> - fast open after setting a flag or flags
+      </p>
     </Styled.Container>
   );
 }
