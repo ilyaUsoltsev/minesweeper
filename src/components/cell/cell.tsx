@@ -1,26 +1,14 @@
-import { relative } from "path";
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import * as Styled from "./cell.styles";
-
-const valuesConfig: Record<any, any> = {
-  0: "",
-  1: 1,
-  2: 2,
-  3: 3,
-  4: 4,
-  5: 5,
-  6: 6,
-  7: 7,
-  8: 8,
-  BOMB: "💣",
-};
+import { cellValuesConfig } from "./constants";
 
 interface IProps {
   isGameOver: boolean;
   value: string | number;
   isOpen: boolean;
+  isMarked: boolean;
   isExploded: boolean;
-  onClick: () => void;
+  onClick: (e: any) => void;
 }
 
 const Cell: FC<IProps> = ({
@@ -29,33 +17,23 @@ const Cell: FC<IProps> = ({
   onClick,
   isExploded,
   isGameOver,
+  isMarked,
 }) => {
-  const [isMarked, setIsMarked] = useState(false);
-
-  const handleClick = (e: any) => {
-    if (!isOpen && e.shiftKey) {
-      setIsMarked(!isMarked);
-    } else if (!isOpen && !isMarked) {
-      onClick();
-      return;
-    }
-  };
-
   const getGameOverValue = (value: string | number) => {
     if (isExploded) return "☠️";
     if (isMarked && value === "BOMB") return "✅";
     if (isMarked && value !== "BOMB") return "❌";
-    return valuesConfig[value];
+    return cellValuesConfig[value];
   };
 
   return (
     <Styled.Container
-      isOpen={isOpen}
-      onClick={handleClick}
+      isOpen={isOpen || (isGameOver && isMarked)}
+      onClick={onClick}
       isExploded={isExploded}
       value={value as number}
     >
-      {isGameOver ? getGameOverValue(value) : valuesConfig[value]}
+      {isGameOver ? getGameOverValue(value) : cellValuesConfig[value]}
       <Styled.Cover isOpen={isOpen || (isGameOver && isMarked)}>
         {!isOpen && isMarked && !isGameOver ? "🚩" : ""}
       </Styled.Cover>

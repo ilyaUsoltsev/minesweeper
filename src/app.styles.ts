@@ -15,3 +15,14 @@ export const Layout = styled.div`
   display: grid;
   grid-template-columns: repeat(${SIZE}, 1fr);
 `;
+
+export const Controls = styled.div`
+  margin-bottom: 12px;
+`;
+
+export const GameButton = styled.button`
+  outline: none;
+  cursor: pointer;
+  padding: 10px 15px;
+  font-size: 24px;
+`;

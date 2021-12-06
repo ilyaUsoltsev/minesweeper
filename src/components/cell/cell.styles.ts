@@ -8,6 +8,7 @@ export const Cover = styled.div<{ isOpen: boolean }>`
   height: 100%;
   display: flex;
   align-items: center;
+  border-radius: 2px;
   justify-content: center;
   background-color: ${(props) =>
     props.isOpen ? "transparent" : "rgb(188,188,188)"};

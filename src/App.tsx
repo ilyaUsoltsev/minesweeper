@@ -15,16 +15,21 @@ const getMatrix = () =>
 function App() {
   const [matrix, setMatrix] = useState(getMatrix);
   const [opened, setOpened] = useState<Record<string, boolean>>({});
+  const [marked, setMarked] = useState<Record<string, boolean>>({});
   const [bombPositions, setBombPositions] = useState<string[]>([]);
   const [explodedBomb, setExplodedBomb] = useState<string>();
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [isGameWon, setIsGameWon] = useState<boolean>(false);
   const isGameStarted = useRef(false);
 
   useEffect(() => {
-    if (SIZE * SIZE - Object.keys(opened).length === BOMBS_TOTAL) {
-      alert("SUCCESS!!!");
+    if (
+      SIZE * SIZE - Object.keys(opened).length === BOMBS_TOTAL &&
+      !isGameOver
+    ) {
+      setIsGameOver(true);
     }
-  }, [opened]);
+  }, [opened, isGameOver]);
 
   const startNewGame = () => {
     isGameStarted.current = false;
@@ -33,49 +38,66 @@ function App() {
     setIsGameOver(false);
     setExplodedBomb(undefined);
     setMatrix(getMatrix);
+    setMarked({});
+    setIsGameWon(false);
   };
 
-  const onClickCell = (cell: string) => {
+  const onDoubleClickCell = (cell: string) => {};
+
+  const onClickCell = (e: any, cell: string) => {
     if (isGameOver) return;
-    let cellValue: number | "BOMB";
-    let bombs: string[] = [];
-    if (!isGameStarted.current) {
-      isGameStarted.current = true;
-      bombs = getBombPositions(cell);
-      setBombPositions(bombs);
-      cellValue = getCellValue(cell, bombs);
-    } else {
-      cellValue = getCellValue(cell, bombPositions);
-    }
+    if (!Boolean(opened[cell]) && e.shiftKey) {
+      setMarked({ ...marked, [cell]: !marked[cell] });
+    } else if (!Boolean(opened[cell]) && !marked[cell]) {
+      let cellValue: number | "BOMB";
+      let bombs: string[] = [];
+      if (!isGameStarted.current) {
+        isGameStarted.current = true;
+        bombs = getBombPositions(cell);
+        setBombPositions(bombs);
+        cellValue = getCellValue(cell, bombs);
+      } else {
+        cellValue = getCellValue(cell, bombPositions);
+      }
 
-    if (cellValue === "BOMB") {
-      setOpened({ ...opened, ...showBombs(bombPositions) });
-      setExplodedBomb(cell);
-      setIsGameOver(true);
-      return;
-    }
+      if (cellValue === "BOMB") {
+        setOpened({ ...opened, ...showBombs(bombPositions) });
+        setExplodedBomb(cell);
+        setIsGameOver(true);
+        return;
+      }
 
-    if (cellValue === 0) {
-      setOpened({
-        ...opened,
-        ...openZeroCells(cell, bombPositions.length ? bombPositions : bombs),
-      });
-    } else {
-      setOpened({ ...opened, [cell]: true });
+      if (cellValue === 0) {
+        setOpened({
+          ...opened,
+          ...openZeroCells(cell, bombPositions.length ? bombPositions : bombs),
+        });
+      } else {
+        setOpened({ ...opened, [cell]: true });
+      }
     }
+  };
+
+  const getButtonEmoji = () => {
+    if (isGameWon) return "😎";
+    if (isGameOver) return "😵";
+    return "😀";
   };
 
   return (
     <Styled.Container>
-      <div>
-        <button onClick={startNewGame}>NEW GAME</button>
-      </div>
+      <Styled.Controls>
+        <Styled.GameButton onClick={startNewGame}>
+          {getButtonEmoji()}
+        </Styled.GameButton>
+      </Styled.Controls>
       <Styled.Layout>
         {matrix.map((row, rowNumber) => {
           return row.map((col: any, colNumber: any) => (
             <Cell
+              isMarked={marked[`${rowNumber}${colNumber}`]}
               isGameOver={isGameOver}
-              onClick={() => onClickCell(`${rowNumber}${colNumber}`)}
+              onClick={(e: any) => onClickCell(e, `${rowNumber}${colNumber}`)}
               isExploded={explodedBomb === `${rowNumber}${colNumber}`}
               isOpen={Boolean(opened[`${rowNumber}${colNumber}`])}
               key={col.id}
